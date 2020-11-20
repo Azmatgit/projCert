@@ -1,0 +1,34 @@
+- name: Install Puppet on master1
+  become: yes
+  hosts: master1
+  tasks:
+
+        - name: Pre-requisite -- Add Puppet hostname to /etc/hosts file
+          shell: if [ ! $(grep puppet /etc/hosts) ];then echo "$(hostname -i) puppet" >>/etc/hosts; fi
+
+        - name: one
+          shell: curl -O https://apt.puppetlabs.com/puppetlabs-release-pc1-xenial.deb
+
+        - name: two
+          shell: dpkg -i puppetlabs-release-pc1-xenial.deb
+
+        - name: three
+          shell: apt-get update
+
+        - name: four
+          shell: apt-get install puppetserver
+           
+        - name: Configure RAM to be used by Puppet
+          shell: sed -i 's/^\(JAVA_ARGS=\).*/\1\"\-Xms512m\ \-Xmx512m\ \-XX\:MaxPermSize=256m\"/' /etc/default/puppetserver
+
+        - name: Start Puppet Server
+          shell: systemctl start puppetserver
+          
+        - name: Check Puppet Status  
+          shell: systemctl status puppetserver
+          
+        - name: Enable Puppetserver  
+          shell: systemctl enable puppetserver
+ 
+        - name: Remove downloaded puppetlabs-release-pc1-xenial.deb file
+          shell: rm puppetlabs-release-pc1-xenial.deb
