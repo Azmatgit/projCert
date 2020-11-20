@@ -1,0 +1,43 @@
+              remote_src: yes
+          
+          - name: create Symlink
+            file: 
+              src: /opt/apache-tomcat-9.0.40 
+              path: /opt/tomcat 
+              owner: tomcat
+              group: tomcat
+              state: link
+          
+          - name: Change ownership of Tomcat installation
+            file: 
+              path: /opt/tomcat/ 
+              owner: tomcat 
+              group: tomcat 
+              mode: 0755 
+              state: directory 
+              recurse: yes
+
+          - name: Clean Old files from git repo
+            shell: rm -rf /home/ansible/git_repo_yaml/.git 2>/dev/null; rm -rf /home/ansible/git_repo_yaml 2>/dev/null
+
+          - name: get git repository files
+            git:
+              repo: https://github.com/Azmatgit/projCert
+              dest: /home/ansible/git_repo_yaml 
+
+          - name: change permissions of downloaded files
+            file:
+              path: /home/ansible/git_repo_yaml
+              mode: 0755
+              state: directory
+              recurse: yes
+              #shell: chmod -R 0755 /home/ansible/git_repo_yaml
+          
+          - name: Install Tomcat init script as a part of ubuntu initialization scripts
+            copy: 
+              src: /home/ansible/git_repo_yaml/tomcat-initscript.sh 
+              dest: /etc/init.d/tomcatd 
+              mode: 0755
+          
+          - name: enable service
+            shell: update-rc.d tomcatd defaults 95
