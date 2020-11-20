@@ -1,0 +1,28 @@
+- name: Install Puppet on slaves(test,prod)
+  become: yes
+  hosts: test,prod
+  tasks:
+
+        - name: Pre-requisite -- Add Puppet hostname to /etc/hosts file
+          shell: if [ ! $(grep puppet /etc/hosts) ];then echo "10.128.0.6 puppet" >>/etc/hosts; fi
+
+        - name: one
+          shell: wget https://apt.puppetlabs.com/puppetlabs-release-pc1-xenial.deb
+
+        - name: two
+          shell: dpkg -i puppetlabs-release-pc1-xenial.deb
+
+        - name: three
+          shell: apt-get update
+
+        - name: four
+          shell: apt-get install puppet-agent
+           
+        - name: Start Puppet Slave
+          shell: systemctl start puppet
+          
+        - name: Check Puppet Status  
+          shell: systemctl status puppet
+          
+        - name: Remove downloaded puppetlabs-release-pc1-xenial.deb file
+          shell: rm puppetlabs-release-pc1-xenial.deb
